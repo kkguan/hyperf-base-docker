@@ -28,8 +28,22 @@ RUN set -ex \
     && mv composer.phar /usr/local/bin/composer \
     && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/ \
     && composer config -g secure-http false \
+    && echo  '{"bitbucket-oauth":{},"github-oauth":{},"gitlab-oauth":{},"gitlab-token":{"47.106.79.235":"CDHpGe4_Poa2TMxyya_T"},"http-basic":{},"gitlab-domains":["47.106.79.235"]}' > ~/.composer/auth.json \
     && ls  ~/.composer/  \
     && cat  ~/.composer/auth.json  \
+    # add igbinary extensions
+    && apk add --no-cache php7-pear php7-dev zlib-dev re2c gcc g++ make curl autoconf\
+    && cp /usr/bin/phpize7 /usr/bin/phpize -f \
+    && curl -fsSL "https://pecl.php.net/get/igbinary-3.2.2.tgz" -o igbinary.tgz \
+    && mkdir -p /tmp/igbinary \
+    && tar -xf igbinary.tgz -C /tmp/igbinary --strip-components=1 \
+    && rm igbinary.tgz \
+    && cd /tmp/igbinary \
+    && phpize && ./configure --with-php-config=/usr/bin/php-config7 --enable-reader && make && make install \
+    && echo "extension=igbinary.so" > /etc/php7/conf.d/igbinary.ini \
+    && rm -rf /var/cache/apk/* /tmp/* /usr/share/man \
+    && php -m \
+    && php --ri igbinary \
     # show php version and extensions
     && php -v \
     && php -m \
