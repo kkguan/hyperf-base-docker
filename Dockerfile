@@ -21,6 +21,16 @@ ENV TIMEZONE=${timezone:-"Asia/Shanghai"} \
 # update
 RUN set -ex \
     && apk update \
+    # install igbinary extension
+    && apk add --no-cache php7-pear php7-dev zlib-dev re2c gcc g++ make curl autoconf\
+    && cp /usr/bin/phpize7 /usr/bin/phpize -f \
+    && curl -fsSL "https://pecl.php.net/get/igbinary-3.2.2.tgz" -o igbinary.tgz \
+    && mkdir -p /tmp/igbinary \
+    && tar -xf igbinary.tgz -C /tmp/igbinary --strip-components=1 \
+    && rm igbinary.tgz \
+    && cd /tmp/igbinary \
+    && phpize && ./configure --with-php-config=/usr/bin/php-config7 --enable-reader && make && make install \
+    && echo "extension=igbinary.so" > /etc/php7/conf.d/igbinary.ini \
     # install composer
     && cd /tmp \
     && wget https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar \
